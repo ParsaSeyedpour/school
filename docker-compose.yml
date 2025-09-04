@@ -1,0 +1,30 @@
+
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-schooldb}
+      POSTGRES_USER: ${POSTGRES_USER:-schooluser}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-schoolpass}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST: db        # ✅ override localhost with container service name
+      POSTGRES_PORT: 5432
+    depends_on:
+      - db
+
+volumes:
+  pgdata:
